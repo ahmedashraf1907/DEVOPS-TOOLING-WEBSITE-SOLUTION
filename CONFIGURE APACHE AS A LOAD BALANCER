@@ -39,6 +39,11 @@ http://<Load-Balancer-Public-IP-Address-or-Public-DNS-Name>/index.php
 #To view your balance between webservers 
 sudo tail -f /var/log/httpd/access_log
 
+#make your webservers as names in Hosts file
+sudo vi /etc/hosts
+<WebServer1-Private-IP-Address> Web1
+<WebServer2-Private-IP-Address> Web2
+
 
 
 
