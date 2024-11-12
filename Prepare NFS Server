@@ -1,1 +1,68 @@
+Ensure there are 3 Logical Volumes. opt-lv, apps-lv, and logs-lv.
+We will add 3 logical volumes to our NFS Server and must be in the same availability zone.
+$ lsblk 
+$ sudo gdisk /dev/xvdb /dev/xvdc /dev/xvdd
+$ sudo yum install lvm2 -y
+$ sudo pvcreate /dev/xvdb1 /dev/xvdc1 /dev/xvdd1 
+$ sudo pvs (successfully created)
+$ sudo vgcreate webdata-vg /dev/xvdb1 /dev/xvdc1 /dev/xvdd1
+$ sudo vgs ( Volume group created successfully)
+$  sudo lvcreate -n apps-lv -L 9G webdata-vg
+$ sudo lvcreate -n logs-lv -L 9G webdata-vg
+$ sudo lvcreate -n opt-lv -L 9G webdata-vg
+$ sudo lvs 
+$ sudo mkfs -t xfs /dev/webdata-vg/apps-lv
+$ sudo mkfs -t xfs /dev/webdata-vg/logs-lv
+$ sudo mkfs -t xfs /dev/webdata-vg/opt-lv
+$ sudo mkdir /mnt/apps /mnt/logs /mnt/opt
+$ sudo mount /dev/webdata-vg/apps-lv /mnt/apps/
+$ sudo mount /dev/webdata-vg/logs-lv /mnt/logs
+$ sudo mount /dev/webdata-vg/opt-lv /mnt/opt
+$ sudo df -h
+We want to make this mount permanent 
+$ sudo blkid 
+$ sudo vim /etc/fstab (add id to each volume id and add his mount path)
+$ sudo mount -a
+$ sudo systemctl daemon-reload
+         Prepare NFS Server 
+$ sudo yum -y update
+$ sudo yum install nfs-utils -y
+$ sudo systemctl start nfs-server.service
+$ sudo systemctl enable nfs-server.service
+$ sudo systemctl status nfs-server.service
+$ sudo chown -R nobody: /mnt/apps
+$ sudo chown -R nobody: /mnt/logs
+$ sudo chown -R nobody: /mnt/opt
+$ sudo chmod -R 777 /mnt/apps
+$ sudo chmod -R 777 /mnt/logs
+$ sudo chmod -R 777 /mnt/opt
+$ sudo systemctl restart nfs-server.service
+Configure access to NFS for clients within the same subnet
+$  sudo vim /etc/exports ( Add your subnet on each path /mnt/apps,/mnt/logs,/mnt/opt)
+$ sudo exportfs -arv
+$ rpcinfo -p | grep nfs
+Open the following ports on SG TCP 111, UDP 111, UDP 2049 , TCP 2049
+
+         Configure NFS client (this step must be done on all three servers)
+$ sudo yum install nfs-utils nfs4-acl-tools -y
+$ sudo mount -t nfs -o rw,nosuid <NFS-Server-Private-IP-Address>:/mnt/apps /var/www
+$ sudo vi /etc/fstab
+$ <NFS-Server-Private-IP-Address>:/mnt/apps /var/www nfs defaults 0 0
+$ sudo yum install httpd -y
+$ sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+$ sudo dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+$ sudo dnf module reset php
+$ sudo dnf module enable php:remi-7.4
+$ sudo dnf install php php-opcache php-gd php-curl php-mysqlnd
+$ sudo systemctl start php-fpm
+$ sudo systemctl enable php-fpm
+$ setsebool -P httpd_execmem 1
+$ sudo systemctl start httpd
+$ sudo systemctl enable httpd
+$ sudo yum install git
+$ sudo rm -rf /var/www/html
+$ git clone https://github.com/ahmedashraf1907/tooling.git
+$ sudo cp -r tooling/html /var/www/
+         Here Your Website Congratulations!
+
 
