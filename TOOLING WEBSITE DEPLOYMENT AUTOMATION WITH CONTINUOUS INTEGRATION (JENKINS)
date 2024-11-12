@@ -1,0 +1,36 @@
+#Install JDK (since Jenkins is a Java-based application)
+sudo apt-get update -y
+sudo apt-get install openjdk-21-jdk
+
+#Install Jenkins
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins
+sudo systemctl status jenkins
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+#Biuld your first FreeStyle Job
+link your git repo  with jenkins
+press build 
+add GitHub hook trigger for GITScm polling and add webhook to your git repo to pull changes automatically
+
+#Move Artifact from Jenkins to NFS
+Add Publish over SSh plugin
+Configure it from System and add Key, Name, Hostname, Username, Your Remote Dirctory on NFS
+#On your Job 
+Configure and choose Send build artifacts over SSH
+
+#On NFS Server 
+sudo chown -R $USER:$USER /mnt/apps
+
+DONE..........:)
+
+
+
+
+
+
